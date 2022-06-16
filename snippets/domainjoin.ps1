@@ -1,0 +1,1 @@
+Add-Computer -DomainName mellowfats.dev -Credential mellowfats\Administrator -Restart -Force

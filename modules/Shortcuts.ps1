@@ -1,0 +1,1 @@
+New-Variable -Name "vscode" -Value "C:\Users\<drive>VS Workspace"

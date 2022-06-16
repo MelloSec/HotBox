@@ -1,0 +1,1 @@
+wbadmin start backup -backuptarget:j: -include:c: -allcritical -quiet
