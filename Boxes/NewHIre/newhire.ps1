@@ -11,6 +11,9 @@ Set-ExecutionPolicy Bypass -Force
 # Get Desired HostName for the computer
 $compName = (Read-Host "Enter New Computer Name")
 
+# Desktop Path
+$DesktopPath = [Environment]::GetFolderPath("Desktop")
+
 # Create ITA user
 Set-LocalUser -Name "ita" -PasswordNeverExpires 1
 
@@ -121,12 +124,16 @@ choco install belarcadvisor --install-directory='C:\Program Files\BelArc'
 choco install adobereader --install-directory='C:\Program Files\Adobe'
 choco install microsoft-teams.install
 
+# Shortcuts 
+Install-ChocolateyShortcut -ShortcutFilePath "$DesktopPath\Adobe.lnk" -TargetPath 'C:\Program Files\Adobe\Acrobat DC\Acrobat\Acrobat.exe'
+
+
 # Sysmon w/ custom configuration
-mkdir "C:\sysmon";
-Invoke-WebRequest -Uri "https://github.com/mellonaut/sysmon/raw/main/sysmon.zip" -OutFile "C:\sysmon\sysmon.zip";
-Expand-Archive "c:\sysmon\sysmon.zip" -DestinationPath "C:\sysmon";
-cd "c:\sysmon";
-c:\sysmon\sysmon.exe -acceptEula -i c:\sysmon\sysmonconfig.xml
+mkdir 'C:\sysmon';
+Invoke-WebRequest -Uri 'https://github.com/mellonaut/sysmon/raw/main/sysmon.zip' -OutFile 'C:\sysmon\sysmon.zip';
+Expand-Archive 'c:\sysmon\sysmon.zip' -DestinationPath "C:\sysmon";
+cd 'c:\sysmon';
+c:\sysmon\sysmon.exe -acceptEula -i 'c:\sysmon\sysmonconfig.xml'
 
 ###############################################################################
 # Remove Bloatware
