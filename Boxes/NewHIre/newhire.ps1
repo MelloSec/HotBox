@@ -8,8 +8,11 @@
 $PSCred = Get-Credential
 Set-ExecutionPolicy Bypass -Force
 
-# Get HostName for the computer
+# Get Desired HostName for the computer
 $compName = (Read-Host "Enter New Computer Name")
+
+# Create ITA user
+Set-LocalUser -Name "ita" -PasswordNeverExpires 1
 
 #Set admin password
 do {
@@ -84,8 +87,7 @@ Set-WindowsExplorerOptions -EnableShowFileExtensions
 Disable-BingSearch
 Disable-GameBarTips
 
-# # Create ITA user
-# Set-LocalUser -Name "ita" -PasswordNeverExpires 1
+
 
 
 # Set a nice wallpaper : 
@@ -102,11 +104,10 @@ reg add "HKEY_CURRENT_USER\Control Panel\Colors" /v Background /t REG_SZ /d "0 0
 # Disable Invasive Privacy Settings
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\OOBE" /v DisablePrivacyExperience /t REG_DWORD /d 1
 
-# Set the Computer Name
 
 
 ###############################################################################
-Enable and Run Updates
+# Enable and Run Updates
 ###############################################################################
 Install-WindowsUpdate -MicrosoftUpdate -AcceptAll -AutoReboot
 
@@ -193,13 +194,13 @@ foreach ($app in $applicationList) {
     'Boxstarter.HyperV', 'Boxstarter.Chocolatey', 'Boxstarter.Bootstrapper', 'Boxstarter.WinConfig', 'BoxStarter.Common' |
     ForEach-Object { choco uninstall $_ }
 
-# Remove the Boxstarter data folder
-Remove-Item -Path (Join-Path -Path $env:ProgramData -ChildPath 'Boxstarter') -Recurse -Force
+# # Remove the Boxstarter data folder
+# Remove-Item -Path (Join-Path -Path $env:ProgramData -ChildPath 'Boxstarter') -Recurse -Force
 
-# Remove Boxstarter from the path in both the current session and the system
-$env:PATH = ($env:PATH -split ';' | Where-Object { $_ -notlike '*Boxstarter*' }) -join ';'
-[Environment]::SetEnvironmentVariable('PATH', $env:PATH, 'Machine')
+# # Remove Boxstarter from the path in both the current session and the system
+# $env:PATH = ($env:PATH -split ';' | Where-Object { $_ -notlike '*Boxstarter*' }) -join ';'
+# [Environment]::SetEnvironmentVariable('PATH', $env:PATH, 'Machine')
 
-# Remove Boxstarter from the PSModulePath in both the current session and the system
-$env:PSModulePath = ($env:PSModulePath -split ';' | Where-Object { $_ -notlike '*Boxstarter*' }) -join ';'
-[Environment]::SetEnvironmentVariable('PSModulePath', $env:PSModulePath, 'Machine')
+# # Remove Boxstarter from the PSModulePath in both the current session and the system
+# $env:PSModulePath = ($env:PSModulePath -split ';' | Where-Object { $_ -notlike '*Boxstarter*' }) -join ';'
+# [Environment]::SetEnvironmentVariable('PSModulePath', $env:PSModulePath, 'Machine')
