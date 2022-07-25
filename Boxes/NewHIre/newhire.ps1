@@ -14,6 +14,13 @@ $compName = (Read-Host "Enter New Computer Name")
 # Desktop Path
 $DesktopPath = [Environment]::GetFolderPath("Desktop")
 
+# Set up Chocolatey
+# Download the boxstarter bootstrap
+. { iwr -useb https://boxstarter.org/bootstrapper.ps1 } | iex; Get-Boxstarter -Force
+
+# No Boxstarter / In case you want to install chocolatey by itself
+# [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+
 # Create ITA user
 Set-LocalUser -Name "ita" -PasswordNeverExpires 1
 
@@ -36,11 +43,11 @@ do {
 	$pwd1_text = 'a'
 	$pwd2_text = 'a'
 	
-#set new PC name
+# set new PC name
 Write-Host -ForegroundColor Green "`n`nSetting Computer name..."
 Rename-Computer -NewName $compName
 
-#Enable .NET Framework
+# Enable .NET Framework
 Write-Host -ForegroundColor Green "Enable .NET Framework"
 Enable-WindowsOptionalFeature -Online -FeatureName NetFx3 -All
 
@@ -50,13 +57,13 @@ Write-Host -ForegroundColor Green "Disabling LLMNR"
 REG ADD  “HKLM\Software\policies\Microsoft\Windows NT\DNSClient”
 REG ADD  “HKLM\Software\policies\Microsoft\Windows NT\DNSClient” /v ” EnableMulticast” /t REG_DWORD /d “0” /f
 
-#Disable NBT-NS
+# Disable NBT-NS
 Write-Host -ForegroundColor Green "Disabling NBT-NS"
 $regkey = "HKLM:SYSTEM\CurrentControlSet\services\NetBT\Parameters\Interfaces"
 Get-ChildItem $regkey |foreach { Set-ItemProperty -Path "$regkey\$($_.pschildname)" -Name NetbiosOptions -Value 2 -Verbose}
 
 Write-Host -ForegroundColor Green "Enabling SMB signing as always"
-#Enable SMB signing as 'always'
+# Enable SMB signing as 'always'
 $Parameters = @{
     RequireSecuritySignature = $True
     EnableSecuritySignature = $True
@@ -65,12 +72,6 @@ $Parameters = @{
 }
 Set-SmbServerConfiguration @Parameters
 
-# Set up Chocolatey
-# Download the boxstarter bootstrap
-. { iwr -useb https://boxstarter.org/bootstrapper.ps1 } | iex; Get-Boxstarter -Force
-
-# No Boxstarter / In case you want to install chocolatey by itself
-# [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
 
 Write-Host "Initializing that chocolatey goodness"
 choco feature enable -n allowGlobalConfirmation
