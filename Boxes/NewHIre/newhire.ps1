@@ -1,15 +1,63 @@
 ###############################################################################
-# System Configuration
-# Malware Development / Analysis starter 
-# Cleans up windows, installs tooling
-# Disables Defender / FW / security features
-# So.. production ready!
-# TODO: add section for calling from /scripts like boxjump for WSL 
+# Script for provisioning a Laptop for a new hire
+# Installs features, hardens SMB, LLMNR and NBT-NS
+# Installs basic software
 ###############################################################################
 
 # Get admin creds and set execution policy
 $PSCred = Get-Credential
 Set-ExecutionPolicy Bypass -Force
+
+# Get HostName for the computer
+$compName = (Read-Host "Enter New Computer Name")
+
+#Set admin password
+do {
+	Write-Host "`nEnter Admin password"
+		$pwd1 = Read-Host "Password" -AsSecureString
+		$pwd2 = Read-Host "Confirm Password" -AsSecureString
+		$pwd1_text = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($pwd1))
+		$pwd2_text = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($pwd2))
+		
+		if ($pwd1_text -ne $pwd2_text) {
+		Write-Warning "`nPasswords do not match. Please try again."
+		}
+	}
+	while ($pwd1_text -ne $pwd2_text)
+	
+	Write-Host "`n`nPasswords matched"
+	$userPass = $pwd1
+	$pwd1_text = 'a'
+	$pwd2_text = 'a'
+	
+#set new PC name
+Write-Host -ForegroundColor Green "`n`nSetting Computer name..."
+Rename-Computer -NewName $compName
+
+#Enable .NET Framework
+Write-Host -ForegroundColor Green "Enable .NET Framework"
+Enable-WindowsOptionalFeature -Online -FeatureName NetFx3 -All
+
+# Update security settings
+#Disable LLMNR
+Write-Host -ForegroundColor Green "Disabling LLMNR"
+REG ADD  “HKLM\Software\policies\Microsoft\Windows NT\DNSClient”
+REG ADD  “HKLM\Software\policies\Microsoft\Windows NT\DNSClient” /v ” EnableMulticast” /t REG_DWORD /d “0” /f
+
+#Disable NBT-NS
+Write-Host -ForegroundColor Green "Disabling NBT-NS"
+$regkey = "HKLM:SYSTEM\CurrentControlSet\services\NetBT\Parameters\Interfaces"
+Get-ChildItem $regkey |foreach { Set-ItemProperty -Path "$regkey\$($_.pschildname)" -Name NetbiosOptions -Value 2 -Verbose}
+
+Write-Host -ForegroundColor Green "Enabling SMB signing as always"
+#Enable SMB signing as 'always'
+$Parameters = @{
+    RequireSecuritySignature = $True
+    EnableSecuritySignature = $True
+    EncryptData = $True
+    Confirm = $false
+}
+Set-SmbServerConfiguration @Parameters
 
 # Set up Chocolatey
 # Download the boxstarter bootstrap
@@ -36,8 +84,11 @@ Set-WindowsExplorerOptions -EnableShowFileExtensions
 Disable-BingSearch
 Disable-GameBarTips
 
+# # Create ITA user
+# Set-LocalUser -Name "ita" -PasswordNeverExpires 1
 
-# Set a nice S1 wallpaper : 
+
+# Set a nice wallpaper : 
 write-host "Setting a nice wallpaper"
 $web_dl = new-object System.Net.WebClient
 $wallpaper_url = "https://tessier-ashpool.s3.us-east-1.amazonaws.com/computerdesktop.jpg"
@@ -48,22 +99,26 @@ reg add "HKEY_CURRENT_USER\Control Panel\Desktop" /v WallpaperStyle /t REG_DWORD
 reg add "HKEY_CURRENT_USER\Control Panel\Desktop" /v StretchWallpaper /t REG_DWORD /d "2" /f 
 reg add "HKEY_CURRENT_USER\Control Panel\Colors" /v Background /t REG_SZ /d "0 0 0" /f
 
+# Disable Invasive Privacy Settings
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\OOBE" /v DisablePrivacyExperience /t REG_DWORD /d 1
+
+# Set the Computer Name
+
 
 ###############################################################################
 Enable and Run Updates
 ###############################################################################
-Enable-MicrosoftUpdate
 Install-WindowsUpdate -MicrosoftUpdate -AcceptAll -AutoReboot
 
 
 ###############################################################################
 # Apps Features and Utilites
 ###############################################################################
-choco feature enable -n allowGlobalConfirmation
-cinst -y microsoft-windows-terminal -y
-cinst -y office365business --params="/productid:O365ProPlusRetail" /exclude: 
-cinst -y belarcadvisor
-cinst -y adobereader
+choco install microsoft-windows-terminal
+choco install office365business --params="/productid:O365ProPlusRetail" /exclude: 
+choco install belarcadvisor --install-directory='C:\Program Files\BelArc'
+choco install adobereader --install-directory='C:\Program Files\Adobe'
+choco install microsoft-teams.install
 
 # Sysmon w/ custom configuration
 mkdir "C:\sysmon";
@@ -136,7 +191,7 @@ foreach ($app in $applicationList) {
 # Remove the Chocolatey packages in a specific order!
 'Boxstarter.Azure', 'Boxstarter.TestRunner', 'Boxstarter.WindowsUpdate', 'Boxstarter',
     'Boxstarter.HyperV', 'Boxstarter.Chocolatey', 'Boxstarter.Bootstrapper', 'Boxstarter.WinConfig', 'BoxStarter.Common' |
-    ForEach-Object { choco uninstall $_ -y }
+    ForEach-Object { choco uninstall $_ }
 
 # Remove the Boxstarter data folder
 Remove-Item -Path (Join-Path -Path $env:ProgramData -ChildPath 'Boxstarter') -Recurse -Force
