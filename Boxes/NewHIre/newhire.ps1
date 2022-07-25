@@ -4,9 +4,9 @@
 # Installs basic software
 ###############################################################################
 
-# Get admin creds and set execution policy
-$PSCred = Get-Credential
-Set-ExecutionPolicy Bypass -Force
+# # Get admin creds and set execution policy
+# $PSCred = Get-Credential
+# Set-ExecutionPolicy Bypass -Force
 
 # Get Desired HostName for the computer
 $compName = (Read-Host "Enter New Computer Name")
