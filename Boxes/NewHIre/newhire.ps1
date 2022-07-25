@@ -125,7 +125,8 @@ choco install adobereader --install-directory='C:\Program Files\Adobe'
 choco install microsoft-teams.install
 
 # Shortcuts 
-Install-ChocolateyShortcut -ShortcutFilePath "$DesktopPath\Adobe.lnk" -TargetPath 'C:\Program Files\Adobe\Acrobat DC\Acrobat\Acrobat.exe'
+Install-ChocolateyShortcut -ShortcutFilePath "$DesktopPath\Adobe.lnk" -TargetPath 'C:\Program Files\Adobe\Acrobat.exe' -ErrorAction Continue
+Install-ChocolateyShortcut -ShortcutFilePath "$DesktopPath\Teams.lnk" -TargetPath 'C:\Program Files (x86)\Teams\Teams.exe' -ErrorAction Continue
 
 
 # Sysmon w/ custom configuration
