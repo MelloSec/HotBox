@@ -34,10 +34,15 @@ function Install-Software {
     choco install googlechrome -y
     choco install firefox -y
     choco install brave -y
+	choco install unixutils -y
     choco install git -y
+	choco install grep -y
+	choco install curl -y
+	choco install cut -y
     choco install poshgit -y
     choco install wsl2 -y
     choco install vscode -y
+	choco install cygwin -y
     choco install vscode-powershell -y
     choco install openvpn-connect -y
     choco install wireguard -y
