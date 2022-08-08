@@ -119,11 +119,13 @@ Install-WindowsUpdate -MicrosoftUpdate -AcceptAll -AutoReboot
 ###############################################################################
 # Apps Features and Utilites
 ###############################################################################
-choco install microsoft-windows-terminal
-choco install office365business --params="/productid:O365ProPlusRetail" /exclude: 
+
 choco install belarcadvisor --install-directory='C:\Program Files\BelArc'
 choco install adobereader --install-directory='C:\Program Files\Adobe'
 choco install microsoft-teams.install
+choco install office365business --params="/productid:O365ProPlusRetail" /exclude: 
+choco install microsoft-windows-terminal
+
 
 # Shortcuts 
 Install-ChocolateyShortcut -ShortcutFilePath "$DesktopPath\Adobe.lnk" -TargetPath 'C:\Program Files\Adobe\Acrobat.exe' -ErrorAction Continue

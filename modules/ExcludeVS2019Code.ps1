@@ -1,3 +1,4 @@
+# Excludes VS folders from being indexed at startup
 # Remember to run the script "as Administrator"
 
 $pathExclusions = New-Object System.Collections.ArrayList
